@@ -1,0 +1,19 @@
+{
+  "name": "express-smart-router",
+  "version": "1.0.0",
+  "description": "Auto-load Express route files from folder structure with API version support.",
+  "main": "index.js",
+  "keywords": [
+    "express",
+    "router",
+    "autoload",
+    "routing",
+    "api",
+    "versioning"
+  ],
+  "author": "Eren Seyfi",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14"
+  }
+}
