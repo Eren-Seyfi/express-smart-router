@@ -4,6 +4,8 @@
 
 **express-smart-router**, Express.js projelerinizde route dosyalarını klasör yapısına göre otomatik olarak yükleyen, versiyonlama ve middleware gibi gelişmiş özellikleri destekleyen güçlü ve sade bir yönlendirme motorudur.
 
+[![npm version](https://img.shields.io/npm/v/express-smart-router)](https://www.npmjs.com/package/express-smart-router)
+
 ---
 
 ## 🚀 Öne Çıkan Özellikler
