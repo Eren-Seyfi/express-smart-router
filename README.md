@@ -4,6 +4,8 @@
 
 **express-smart-router** is a powerful and minimalist routing engine for Express.js projects. It automatically loads route files based on folder structure and supports advanced features like versioning, route prefixes, file filtering, and global middleware.
 
+[![npm version](https://img.shields.io/npm/v/express-smart-router)](https://www.npmjs.com/package/express-smart-router)
+
 ---
 
 ## 🚀 Key Features
