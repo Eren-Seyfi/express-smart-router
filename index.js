@@ -2,15 +2,23 @@ const fs = require("fs");
 const path = require("path");
 
 /**
- * Auto-load Express route files recursively
- *
- * @param {Express.Application} app - Express app instance
- * @param {string} routesDir - Absolute path to the routes folder
- * @param {object} options
- * @param {RegExp} [options.match] - Regex to match filenames (e.g. /\.router\.js$/)
+ * express-smart-router
+ * @param {import("express").Application} app
+ * @param {string} baseDir
+ * @param {{
+ *   baseRoute?: string;
+ *   verbose?: boolean;
+ *   match?: RegExp;
+ *   middleware?: import("express").RequestHandler[];
+ * }} options
  */
-function loadRoutes(app, routesDir, options = {}) {
-  const { match = /\.js$/ } = options; // Varsayılan: tüm .js dosyaları
+function smartRouter(app, baseDir, options = {}) {
+  const {
+    baseRoute = "",
+    verbose = true,
+    match = /\.js$/,
+    middleware = [],
+  } = options;
 
   function walk(dir, routePrefix = "") {
     const entries = fs.readdirSync(dir);
@@ -20,24 +28,44 @@ function loadRoutes(app, routesDir, options = {}) {
       const stat = fs.statSync(fullPath);
 
       if (stat.isDirectory()) {
-        walk(fullPath, path.join(routePrefix, entry));
+        const newPrefix = path.posix.join(routePrefix, entry);
+        walk(fullPath, newPrefix);
       } else if (match.test(entry)) {
-        const router = require(fullPath);
-        const routeName = path.basename(entry, ".js");
+        const module = require(fullPath);
+        const router =
+          typeof module === "function" ? module : module.default || module;
 
-        let routePath = path
-          .join(routePrefix, routeName)
-          .replace(/\\/g, "/")
-          .replace(/\/index$/i, "/") // index.js → kök
-          .replace(/\/+/g, "/");
+        // ✅ index.js veya index.router.js → routePrefix
+        const isIndexFile = entry === "index.js" || entry === "index.router.js";
 
-        app.use(routePath, router);
-        console.log(`✅ Loaded route: ${routePath}`);
+        let routePath;
+        if (isIndexFile) {
+          routePath = "/" + routePrefix;
+        } else {
+          const cleanName = entry.replace(/(\.router)?\.js$/, "");
+          routePath = "/" + path.posix.join(routePrefix, cleanName);
+        }
+
+        // path temizliği
+        routePath =
+          path.posix
+            .join(baseRoute, routePath)
+            .replace(/\/+/g, "/")
+            .replace(/\/$/, "") || "/";
+
+        if (Array.isArray(middleware) && middleware.length > 0) {
+          app.use(routePath, ...middleware, router);
+        } else {
+          app.use(routePath, router);
+        }
+
+        if (verbose)
+          console.log(`✅ Route yüklendi: [${routePath}] → ${fullPath}`);
       }
     });
   }
 
-  walk(routesDir);
+  walk(baseDir);
 }
 
-module.exports = loadRoutes;
+module.exports = smartRouter;

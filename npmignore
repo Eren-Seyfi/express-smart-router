@@ -1,0 +1,17 @@
+# Development and example files
+example/
+tests/
+coverage/
+docs/
+
+# Config and cache
+*.log
+*.env
+*.swp
+.vscode/
+.idea/
+node_modules/
+
+# Non-source artifacts
+README.tr.md
+CHANGELOG.md

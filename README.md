@@ -2,18 +2,21 @@
 
 🔁 [Bu README dosyasını Türkçe olarak görüntüle](./README.tr.md)
 
-**express-smart-router** is a simple and powerful route loader that automatically loads all your route files based on folder structure and supports versioned APIs in Express.js projects.
+**express-smart-router** is a powerful and minimalist routing engine for Express.js projects. It automatically loads route files based on folder structure and supports advanced features like versioning, route prefixes, file filtering, and global middleware.
 
 ---
 
-## 🚀 Features
+## 🚀 Key Features
 
-- ✅ Auto-discovery of route files (`routes` folder and subfolders)
-- 📁 Automatically mounts using `app.use()` based on file/folder structure
-- 🔄 Supports both `.js` and `.router.js` files
-- 🧠 `index.js` files are mounted to root path (`/api/v1/index.js` → `/api/v1/`)
-- 🎯 API versioning support (`/api/v1`, `/api/v2`, etc.)
-- ☁ Cross-platform: works on Windows, macOS, and Linux
+- ✅ **Auto route discovery** – Recursively scans `routes/` and subdirectories
+- 📁 **`index.js` & `index.router.js`** are bound to the folder root (`routes/admin/index.js` → `/admin`)
+- 📄 **Extension support** – Supports `.js`, `.router.js`, `.route.js` (configurable)
+- 🔍 **`match` filter** – Load only files matching the given RegExp
+- ✨ **`baseRoute`** – Add a prefix to all routes (e.g. `/api`)
+- 🔗 **`middleware`** – Apply global middleware to all routes
+- 📣 **`verbose`** – Log loaded routes to the terminal
+- 💙 **TypeScript support** – Ships with `index.d.ts` typings
+- ☁ **Cross-platform** – Works on Windows, Linux, and macOS
 
 ---
 
@@ -25,58 +28,139 @@ npm install express-smart-router
 
 ---
 
-## 🛠️ Usage
-
-### 📁 Example Project Structure
+## 📁 Example Project Structure
 
 ```
 routes/
-├── index.js               → /
+├── index.js                  → /
+├── hello/
+│   └── index.js              → /hello
 ├── auth/
-│   └── login.js           → /auth/login
+│   └── login.route.js        → /auth/login
 └── api/
     ├── v1/
-    │   └── users.js       → /api/v1/users
+    │   ├── index.router.js   → /api/v1
+    │   └── user.router.js    → /api/v1/user
     └── v2/
-        └── stats.js       → /api/v2/stats
+        └── stats.js          → /api/v2/stats
 ```
 
-### 📄 app.js
+---
+
+## 🔧 Basic Usage
 
 ```js
 const express = require('express');
 const path = require('path');
-const loadRoutes = require('express-smart-router');
+const smartRouter = require('express-smart-router');
 
 const app = express();
 app.use(express.json());
 
-loadRoutes(app, path.join(__dirname, 'routes'));
+smartRouter(app, path.join(__dirname, 'routes'));
 
 app.listen(3000, () => {
-  console.log('🚀 Server running on http://localhost:3000');
+  console.log('🚀 Server running at http://localhost:3000');
 });
 ```
 
 ---
 
-## ⚙️ Advanced Usage
+## ⚙️ Configuration Options
 
-### 🔎 Only load `*.router.js` files:
+### 🔁 `baseRoute`: Global prefix for all routes
 
 ```js
-loadRoutes(app, path.join(__dirname, 'routes'), {
-  match: /\.router\.js$/,
+smartRouter(app, path.join(__dirname, 'routes'), {
+  baseRoute: '/api'
+});
+// routes/user.js → /api/user
+```
+
+---
+
+### 🧠 `match`: File matching filter using RegExp
+
+Only load `.router.js` and `.route.js` files:
+
+```js
+smartRouter(app, path.join(__dirname, 'routes'), {
+  match: /\.(router|route)\.js$/
+});
+```
+
+Default value:
+```js
+match: /\.js$/
+```
+
+> Loads all `.js`, `.router.js`, `.route.js` files by default.
+
+---
+
+### 🔗 `middleware`: Global middleware applied to all routes
+
+```js
+const logger = (req, res, next) => {
+  console.log(`[${req.method}] ${req.url}`);
+  next();
+};
+
+smartRouter(app, path.join(__dirname, 'routes'), {
+  middleware: [logger]
 });
 ```
 
 ---
 
-## ✅ Supported Platforms
+### 📣 `verbose`: Control terminal logging
 
-- 🪟 Windows
-- 🐧 Linux
-- 🍎 macOS
+```js
+smartRouter(app, path.join(__dirname, 'routes'), {
+  verbose: false // disables route logging
+});
+```
+
+---
+
+## ✅ Route Resolution Rules
+
+| File                            | Route            |
+|---------------------------------|------------------|
+| `routes/index.js`               | `/`              |
+| `routes/index.router.js`        | `/`              |
+| `routes/hello/index.js`         | `/hello`         |
+| `routes/api/v1/index.router.js` | `/api/v1`        |
+| `routes/api/v1/user.route.js`   | `/api/v1/user`   |
+| `routes/api/v2/stats.js`        | `/api/v2/stats`  |
+
+> 📌 Only `index.js` and `index.router.js` are treated as special entry points.
+
+---
+
+## 🟦 TypeScript Support
+
+```ts
+import express from "express";
+import smartRouter from "express-smart-router";
+import path from "path";
+
+const app = express();
+
+smartRouter(app, path.join(__dirname, "routes"), {
+  baseRoute: "/api",
+  match: /\.(router|route)\.js$/,
+  verbose: true,
+});
+```
+
+---
+
+## 🧪 Compatibility
+
+- ✅ Node.js 14+
+- ✅ Express 4.x and 5.x
+- ✅ TypeScript 4.x+
 
 ---
 
@@ -86,16 +170,7 @@ MIT License
 
 ---
 
-## ✨ Contributing
-
-Pull requests and suggestions are always welcome!
-
----
-
 ## 👨‍💻 Author
 
 **Eren Seyfi**  
 [GitHub](https://github.com/Eren-Seyfi)
-
-
----

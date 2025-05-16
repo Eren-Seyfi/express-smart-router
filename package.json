@@ -1,19 +1,44 @@
 {
   "name": "express-smart-router",
-  "version": "1.0.0",
-  "description": "Auto-load Express route files from folder structure with API version support.",
+  "version": "1.0.1",
+  "description": "Auto-load Express route files from folder structure with API versioning, extension filtering, and middleware support.",
   "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "dev": "node ./example/app.js"
+  },
   "keywords": [
     "express",
     "router",
     "autoload",
     "routing",
     "api",
-    "versioning"
+    "versioning",
+    "middleware",
+    "typescript",
+    "smart-router"
   ],
   "author": "Eren Seyfi",
   "license": "MIT",
   "engines": {
     "node": ">=14"
-  }
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "morgan": "^1.10.0"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Eren-Seyfi/express-smart-router"
+  },
+  "bugs": {
+    "url": "https://github.com/Eren-Seyfi/express-smart-router/issues"
+  },
+  "homepage": "https://github.com/Eren-Seyfi/express-smart-router#readme"
 }
