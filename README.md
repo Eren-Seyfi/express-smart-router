@@ -34,17 +34,41 @@ npm install express-smart-router
 
 ```
 routes/
-├── index.js                  → /
+├── index.js                  → GET /
 ├── hello/
-│   └── index.js              → /hello
+│   └── index.js              → GET /hello
 ├── auth/
-│   └── login.route.js        → /auth/login
+│   └── login.route.js        → POST /auth/login
 └── api/
     ├── v1/
     │   ├── index.router.js   → /api/v1
     │   └── user.router.js    → /api/v1/user
     └── v2/
         └── stats.js          → /api/v2/stats
+```
+
+---
+
+## 🗂️ Route vs Router Files
+
+`express-smart-router` supports multiple file extensions for route files:
+
+| Extension         | Description |
+|-------------------|-------------|
+| `.js`             | General route file. Can be used for single or multiple endpoints. |
+| `.router.js`      | Conventionally used for modular route handlers with `express.Router()`. |
+| `.route.js`       | Ideal for single-purpose route files, but also supports modular usage. |
+
+Example:
+
+```js
+// user.router.js
+const router = require('express').Router();
+
+router.get('/', (req, res) => res.send('User list'));
+router.post('/', (req, res) => res.send('Create user'));
+
+module.exports = router;
 ```
 
 ---
@@ -91,12 +115,10 @@ smartRouter(app, path.join(__dirname, 'routes'), {
 });
 ```
 
-Default value:
+Default:
 ```js
 match: /\.js$/
 ```
-
-> Loads all `.js`, `.router.js`, `.route.js` files by default.
 
 ---
 
@@ -115,11 +137,11 @@ smartRouter(app, path.join(__dirname, 'routes'), {
 
 ---
 
-### 📣 `verbose`: Control terminal logging
+### 📣 `verbose`: Enable/disable console route logs
 
 ```js
 smartRouter(app, path.join(__dirname, 'routes'), {
-  verbose: false // disables route logging
+  verbose: false
 });
 ```
 
@@ -136,7 +158,7 @@ smartRouter(app, path.join(__dirname, 'routes'), {
 | `routes/api/v1/user.route.js`   | `/api/v1/user`   |
 | `routes/api/v2/stats.js`        | `/api/v2/stats`  |
 
-> 📌 Only `index.js` and `index.router.js` are treated as special entry points.
+> 📌 Only `index.js` and `index.router.js` are treated as root entry points for folders.
 
 ---
 
