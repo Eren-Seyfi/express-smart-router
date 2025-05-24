@@ -2,23 +2,23 @@
 
 🔁 [View this README in English](./README.md)
 
-**express-smart-router**, Express.js projelerinizde route dosyalarını klasör yapısına göre otomatik olarak yükleyen, versiyonlama ve middleware gibi gelişmiş özellikleri destekleyen güçlü ve sade bir yönlendirme motorudur.
+**express-smart-router**, Express.js projelerinde klasör yapısına göre route dosyalarını otomatik olarak yükleyen güçlü ve minimalist bir yönlendirme motorudur. Versiyonlama, route önekleri, dosya filtreleme ve global middleware gibi gelişmiş özellikleri destekler.
 
 [![npm version](https://img.shields.io/npm/v/express-smart-router)](https://www.npmjs.com/package/express-smart-router)
 
 ---
 
-## 🚀 Öne Çıkan Özellikler
+## 🚀 Temel Özellikler
 
-- ✅ **Otomatik route keşfi** – `routes/` klasörü ve alt klasörler recursive şekilde taranır
-- 📁 **`index.js` & `index.router.js`** → klasör köküne bağlanır (`routes/admin/index.js` → `/admin`)
-- 📄 **Uzantı desteği** – `.js`, `.router.js`, `.route.js` gibi uzantılar desteklenir
-- 🔍 **`match` ile filtreleme** – Regex ile sadece belirli uzantılardaki dosyalar yüklenebilir
-- ✨ **`baseRoute`** – Tüm route'lara ön ek ekleyebilirsiniz (örnek: `/api`)
-- 🔗 **`middleware`** – Tüm route'lara global middleware tanımlanabilir
-- 📣 **`verbose`** – Yüklenen route'lar terminalde listelenir
-- 💙 **TypeScript desteği** – Otomatik tanım dosyası (`index.d.ts`) ile uyumludur
-- ☁ **Platform bağımsız** – Windows, Linux, macOS desteği
+- ✅ **Otomatik route keşfi** – `routes/` klasörünü ve alt dizinlerini tarar
+- 📁 **`index.js` & `index.router.js`** dosyaları kök route olarak atanır (`routes/admin/index.js` → `/admin`)
+- 📄 **Dosya uzantısı desteği** – `.js`, `.router.js`, `.route.js` desteklenir (özelleştirilebilir)
+- 🔍 **`match` filtresi** – Belirtilen RegExp ile eşleşen dosyalar yüklenir
+- ✨ **`baseRoute`** – Tüm rotalara önek ekler (örn. `/api`)
+- 🔗 **`middleware`** – Tüm rotalara global middleware uygular
+- 📣 **`verbose`** – Yüklenen rotaları terminalde gösterir
+- 💙 **TypeScript desteği** – `index.d.ts` tipiyle birlikte gelir
+- ☁ **Çapraz platform** – Windows, Linux ve macOS’ta çalışır
 
 ---
 
@@ -34,17 +34,41 @@ npm install express-smart-router
 
 ```
 routes/
-├── index.js                 → /
+├── index.js                  → GET /
 ├── hello/
-│   └── index.js             → /hello
+│   └── index.js              → GET /hello
 ├── auth/
-│   └── login.route.js       → /auth/login
+│   └── login.route.js        → POST /auth/login
 └── api/
     ├── v1/
-    │   ├── index.router.js  → /api/v1
-    │   └── user.router.js   → /api/v1/user
+    │   ├── index.router.js   → /api/v1
+    │   └── user.router.js    → /api/v1/user
     └── v2/
-        └── stats.js         → /api/v2/stats
+        └── stats.js          → /api/v2/stats
+```
+
+---
+
+## 🗂️ Route ve Router Dosyaları
+
+`express-smart-router` farklı dosya uzantılarıyla route dosyalarını destekler:
+
+| Uzantı           | Açıklama |
+|------------------|----------|
+| `.js`            | Genel route dosyasıdır. Tekli veya çoklu endpoint içerebilir. |
+| `.router.js`     | `express.Router()` ile oluşturulan modüler route dosyaları için kullanılır. |
+| `.route.js`      | Genelde tekil endpoint için uygundur, ancak modüler kullanım da desteklenir. |
+
+Örnek:
+
+```js
+// user.router.js
+const router = require('express').Router();
+
+router.get('/', (req, res) => res.send('Kullanıcı listesi'));
+router.post('/', (req, res) => res.send('Kullanıcı oluştur'));
+
+module.exports = router;
 ```
 
 ---
@@ -62,15 +86,15 @@ app.use(express.json());
 smartRouter(app, path.join(__dirname, 'routes'));
 
 app.listen(3000, () => {
-  console.log('🚀 Server running at http://localhost:3000');
+  console.log('🚀 Sunucu http://localhost:3000 adresinde çalışıyor');
 });
 ```
 
 ---
 
-## ⚙️ Tüm Seçenekler
+## ⚙️ Yapılandırma Seçenekleri
 
-### 🔁 `baseRoute`: Global ön ek tanımlama
+### 🔁 `baseRoute`: Tüm rotalara küresel önek
 
 ```js
 smartRouter(app, path.join(__dirname, 'routes'), {
@@ -81,9 +105,9 @@ smartRouter(app, path.join(__dirname, 'routes'), {
 
 ---
 
-### 🧠 `match`: Dosya uzantılarını filtreleme
+### 🧠 `match`: Belirli dosyaları filtrelemek için RegExp
 
-Sadece `.router.js` ve `.route.js` uzantılı dosyaları yükle:
+Sadece `.router.js` ve `.route.js` dosyalarını yükle:
 
 ```js
 smartRouter(app, path.join(__dirname, 'routes'), {
@@ -91,16 +115,14 @@ smartRouter(app, path.join(__dirname, 'routes'), {
 });
 ```
 
-Varsayılan değer:
+Varsayılan:
 ```js
 match: /\.js$/
 ```
 
-> Bu, `.js`, `.router.js`, `.route.js` dosyalarının tümünü içerir.
-
 ---
 
-### 🔗 `middleware`: Tüm route'lara uygulanan global middleware'ler
+### 🔗 `middleware`: Tüm rotalara uygulanacak middleware
 
 ```js
 const logger = (req, res, next) => {
@@ -115,28 +137,28 @@ smartRouter(app, path.join(__dirname, 'routes'), {
 
 ---
 
-### 📣 `verbose`: Terminal loglarını kontrol et
+### 📣 `verbose`: Konsolda route loglarını aç/kapat
 
 ```js
 smartRouter(app, path.join(__dirname, 'routes'), {
-  verbose: false // hiçbir şey loglanmaz
+  verbose: false
 });
 ```
 
 ---
 
-## ✅ Route Eşleme Kuralları
+## ✅ Route Eşleştirme Kuralları
 
-| Dosya                         | Route             |
-|------------------------------|-------------------|
-| `routes/index.js`            | `/`               |
-| `routes/index.router.js`     | `/`               |
-| `routes/hello/index.js`      | `/hello`          |
+| Dosya                           | Route           |
+|----------------------------------|-----------------|
+| `routes/index.js`               | `/`             |
+| `routes/index.router.js`        | `/`             |
+| `routes/hello/index.js`         | `/hello`        |
 | `routes/api/v1/index.router.js` | `/api/v1`       |
-| `routes/api/v1/user.route.js` | `/api/v1/user`    |
-| `routes/api/v2/stats.js`     | `/api/v2/stats`   |
+| `routes/api/v1/user.route.js`   | `/api/v1/user`  |
+| `routes/api/v2/stats.js`        | `/api/v2/stats` |
 
-> 📌 Sadece `index.js` ve `index.router.js` özel dosyalardır, diğer dosyalar adlarına göre route'lanır.
+> 📌 Sadece `index.js` ve `index.router.js` özel giriş noktaları olarak değerlendirilir.
 
 ---
 
@@ -158,11 +180,11 @@ smartRouter(app, path.join(__dirname, "routes"), {
 
 ---
 
-## 🧪 Test Ortamı
+## 🧪 Uyumlu Ortamlar
 
 - ✅ Node.js 14+
-- ✅ Express 4.x ve üzeri
-- ✅ TypeScript 4.x ve üzeri
+- ✅ Express 4.x ve 5.x
+- ✅ TypeScript 4.x+
 
 ---
 
